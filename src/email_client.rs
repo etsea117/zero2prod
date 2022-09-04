@@ -8,7 +8,7 @@ pub struct EmailClient {
     sender: SubscriberEmail,
     authorization_token: Secret<String>,
 }
-
+#[allow(unused_variables)]
 impl EmailClient {
     pub fn new(
         base_url: String,
