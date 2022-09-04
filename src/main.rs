@@ -14,6 +14,7 @@ async fn main() -> std::io::Result<()> {
     let connection_pool = PgPoolOptions::new()
         .acquire_timeout(std::time::Duration::from_secs(2))
         .connect_lazy_with(configuration.database.with_db());
+    let timeout = configuration.email_client.timeout();
 
     let sender_email = configuration
         .email_client
@@ -23,6 +24,7 @@ async fn main() -> std::io::Result<()> {
         configuration.email_client.base_url,
         sender_email,
         configuration.email_client.authorization_token,
+        timeout,
     );
     let address = format!(
         "{}:{}",
