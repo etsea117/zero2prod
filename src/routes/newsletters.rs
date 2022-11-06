@@ -50,8 +50,6 @@ pub async fn publish_newsletter(
                     // We record the error chain as a structured field
                     // on the log record.
                     error.cause_chain = ?error,
-                    // Using `\` to split a long string literal over
-                    // two lines, without creating a `\n` character.
                     "Skipping a confirmed subscriber. \
                     Their stored contact details are invalid",
                 );
@@ -166,8 +164,6 @@ impl ResponseError for PublishError {
                 let header_value = HeaderValue::from_str(r#"Basic realm="publish" "#).unwrap();
                 response
                     .headers_mut()
-                    // actix_web::http::header provides a collection of constants
-                    // for the names of several well-known/standard HTTP headers
                     .insert(header::WWW_AUTHENTICATE, header_value);
                 response
             }
