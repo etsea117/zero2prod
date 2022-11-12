@@ -42,7 +42,7 @@ impl Application {
             connection_pool,
             email_client,
             configuration.application.base_url,
-            configuration.application.hmac_secret,
+            HmacSecret(configuration.application.hmac_secret),
         )?;
 
         // We "save" the bound port in one of `Application`'s fields
@@ -70,12 +70,12 @@ pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
 // a raw `String` would expose us to conflicts.
 pub struct ApplicationBaseUrl(pub String);
 
-pub fn run(
+fn run(
     listener: TcpListener,
     db_pool: PgPool,
     email_client: EmailClient,
     base_url: String,
-    hmac_secret: Secret<String>,
+    hmac_secret: HmacSecret,
 ) -> Result<Server, std::io::Error> {
     let db_pool = web::Data::new(db_pool);
     let email_client = web::Data::new(email_client);
@@ -99,3 +99,6 @@ pub fn run(
     .run();
     Ok(server)
 }
+
+#[derive(Clone)]
+pub struct HmacSecret(pub Secret<String>);
