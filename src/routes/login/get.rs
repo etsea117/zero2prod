@@ -1,17 +1,22 @@
+use crate::startup::HmacSecret;
 use actix_web::http::header::ContentType;
 use actix_web::{web, HttpResponse};
 
 #[derive(serde::Deserialize)]
 pub struct QueryParams {
-    error: Option<String>,
+    error: String,
+    tag: String,
 }
 
-pub async fn login_form(query: web::Query<QueryParams>) -> HttpResponse {
-    let error_html = match query.0.error {
+pub async fn login_form(
+    query: Option<web::Query<QueryParams>>,
+    secret: web::Data<HmacSecret>,
+) -> HttpResponse {
+    let error_html = match query {
         None => "".into(),
-        Some(error_message) => format!(
+        Some(query) => format!(
             "<p><i>{}</i></p>",
-            htmlescape::encode_minimal(&error_message)
+            htmlescape::encode_minimal(&query.0.error)
         ),
     };
     HttpResponse::Ok()
