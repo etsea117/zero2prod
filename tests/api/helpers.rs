@@ -48,6 +48,7 @@ impl TestApp {
             .await
             .expect("Failed to execute.")
     }
+
     pub async fn post_subscriptions(&self, body: String) -> reqwest::Response {
         reqwest::Client::new()
             .post(&format!("{}/subscriptions", &self.address))
