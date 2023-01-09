@@ -39,7 +39,10 @@ impl TestApp {
     where
         Body: serde::Serialize,
     {
-        reqwest::Client::new()
+        reqwest::Client::builder()
+            .redirect(reqwest::redirect::Policy::none())
+            .build()
+            .unwrap()
             .post(&format!("{}/login", &self.address))
             // This `reqwest` method makes sure that the body is URL-encoded
             // and the `Content-Type` header is set accordingly.
@@ -189,4 +192,9 @@ impl TestUser {
         .await
         .expect("Failed to store test user.");
     }
+}
+
+pub fn assert_is_redirect_to(response: &reqwest::Response, location: &str) {
+    assert_eq!(response.status().as_u16(), 303);
+    assert_eq!(response.headers().get("Location").unwrap(), location);
 }

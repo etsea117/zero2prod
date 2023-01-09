@@ -1,4 +1,7 @@
+use crate::helpers::assert_is_redirect_to;
 use crate::helpers::spawn_app;
+use reqwest::header::HeaderValue;
+use std::collections::HashSet;
 
 #[tokio::test]
 async fn an_error_flash_message_is_set_on_failure() {
@@ -11,7 +14,13 @@ async fn an_error_flash_message_is_set_on_failure() {
         "password": "random-password"
     });
     let response = app.post_login(&login_body).await;
+    let cookies: HashSet<_> = response
+        .headers()
+        .get_all("Set-Cookie")
+        .into_iter()
+        .collect();
 
     // Assert
-    assert_eq!(response.status().as_u16(), 303);
+    assert_is_redirect_to(&response, "/login");
+    assert!(cookies.contains(&HeaderValue::from_str("_flash=Authentication failed").unwrap()));
 }
