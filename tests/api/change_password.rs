@@ -96,7 +96,7 @@ async fn current_password_must_be_valid() {
 }
 
 #[tokio::test]
-async fn new_password_must_meet_length_requirement() {
+async fn new_password_must_be_more_than_12_characters() {
     // Arrange
     let app = spawn_app().await;
     let short_password = "12345678901".to_string();
@@ -123,6 +123,38 @@ async fn new_password_must_meet_length_requirement() {
     // Act - Part 3 - Follow the redirect
     let html_page = app.get_change_password_html().await;
     assert!(html_page.contains(
-        "<p><i>The new password you entered must be at least 12 characters long.</i></p>"
+        "<p><i>The new password you entered must be more than 12 and less than 128 characters long.</i></p>"
+    ));
+}
+
+#[tokio::test]
+async fn new_password_must_be_less_than_128_characters() {
+    // Arrange
+    let app = spawn_app().await;
+    let long_password = "12345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678".to_string();
+
+    // Act - Part 1 - Login
+    app.post_login(&serde_json::json!({
+        "username": &app.test_user.username,
+        "password": &app.test_user.password,
+    }))
+    .await;
+
+    // Act - Part 2 - Try to change to short password
+    let response = app
+        .post_change_password(&serde_json::json!({
+            "current_password": &app.test_user.password,
+            "new_password": &long_password,
+            "new_password_check": &long_password,
+        }))
+        .await;
+
+    // Assert
+    assert_is_redirect_to(&response, "/admin/password");
+
+    // Act - Part 3 - Follow the redirect
+    let html_page = app.get_change_password_html().await;
+    assert!(html_page.contains(
+        "<p><i>The new password you entered must be more than 12 and less than 128 characters long.</i></p>"
     ));
 }
