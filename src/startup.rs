@@ -1,6 +1,7 @@
 use crate::configuration::DatabaseSettings;
 use crate::configuration::Settings;
 use crate::email_client::EmailClient;
+use crate::routes::admin_dashboard;
 use crate::routes::home;
 use crate::routes::{confirm, health_check, login, login_form, publish_newsletter, subscribe};
 use actix_session::storage::RedisSessionStore;
@@ -72,10 +73,6 @@ pub fn get_connection_pool(configuration: &DatabaseSettings) -> PgPool {
         .connect_lazy_with(configuration.with_db())
 }
 
-// We need to define a wrapper type in order to retrieve the URL
-// in the `subscribe` handler.
-// Retrieval from the context, in actix-web, is type-based: using
-// a raw `String` would expose us to conflicts.
 pub struct ApplicationBaseUrl(pub String);
 
 async fn run(
@@ -103,6 +100,7 @@ async fn run(
             ))
             .wrap(TracingLogger::default())
             .route("/", web::get().to(home))
+            .route("/admin/dashboard", web::get().to(admin_dashboard))
             .route("/login", web::get().to(login_form))
             .route("/login", web::post().to(login))
             .route("/newsletters", web::post().to(publish_newsletter))
