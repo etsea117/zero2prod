@@ -1,6 +1,7 @@
 use crate::session_state::TypedSession;
 use crate::utils::{e500, see_other};
 use actix_web::{web, HttpResponse};
+use secrecy::ExposeSecret;
 use secrecy::Secret;
 
 #[derive(serde::Deserialize)]
@@ -17,5 +18,10 @@ pub async fn change_password(
     if session.get_user_id().map_err(e500)?.is_none() {
         return Ok(see_other("/login"));
     };
+    // `Secret<String>` does not implement `Eq`,
+    // therefore we need to compare the underlying `String`.
+    if form.new_password.expose_secret() != form.new_password_check.expose_secret() {
+        return Ok(see_other("/admin/password"));
+    }
     todo!()
 }
