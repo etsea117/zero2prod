@@ -18,9 +18,13 @@ jobs:
           POSTGRES_DB: postgres
         ports:
           - 5432:5432
+      redis:
+        image: redis:6
+        ports:
+          - 6379:6379
     env:
-      SQLX_VERSION: 0.5.5
-      SQLX_FEATURES: postgres
+      SQLX_VERSION: 0.6.2
+      SQLX_FEATURES: 'rustls,postgres'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -50,7 +54,7 @@ jobs:
 
       - name: Install sqlx-cli
         uses: actions-rs/cargo@v1
-        
+
         with:
           command: install
           args: >
@@ -100,8 +104,8 @@ jobs:
         ports:
           - 5432:5432
     env:
-      SQLX_VERSION: 0.5.5
-      SQLX_FEATURES: postgres
+      SQLX_VERSION: 0.6.2
+      SQLX_FEATURES: 'rustls,postgres'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -155,9 +159,13 @@ jobs:
           POSTGRES_DB: postgres
         ports:
           - 5432:5432
+      redis:
+        image: redis:6
+        ports:
+          - 6379:6379
     env:
-      SQLX_VERSION: 0.5.5
-      SQLX_FEATURES: postgres
+      SQLX_VERSION: 0.6.2
+      SQLX_FEATURES: 'rustls,postgres'
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
