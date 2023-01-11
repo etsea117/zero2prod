@@ -12,13 +12,19 @@ use anyhow::Context;
 use secrecy::Secret;
 use sqlx::PgPool;
 
+#[derive(serde::Deserialize)]
+pub struct FormData {
+    title: String,
+    content: Content,
+}
+
 #[tracing::instrument(
     name = "Publish a newsletter issue",
-    skip(body, pool, email_client, request),
+    skip(form, pool, email_client, request),
     fields(username=tracing::field::Empty, user_id=tracing::field::Empty)
 )]
 pub async fn publish_newsletter(
-    body: web::Json<BodyData>,
+    form: web::Form<FormData>,
     pool: web::Data<PgPool>,
     email_client: web::Data<EmailClient>,
     request: HttpRequest,
@@ -43,9 +49,9 @@ pub async fn publish_newsletter(
                 email_client
                     .send_email(
                         &subscriber.email,
-                        &body.title,
-                        &body.content.html,
-                        &body.content.text,
+                        &form.0.title,
+                        &form.0.content.html,
+                        &form.0.content.text,
                     )
                     .await
                     .with_context(|| {
@@ -96,12 +102,6 @@ fn basic_authentication(headers: &HeaderMap) -> Result<Credentials, anyhow::Erro
         username,
         password: Secret::new(password),
     })
-}
-
-#[derive(serde::Deserialize)]
-pub struct BodyData {
-    title: String,
-    content: Content,
 }
 
 #[derive(serde::Deserialize)]
